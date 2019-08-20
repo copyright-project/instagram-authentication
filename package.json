@@ -4,10 +4,11 @@
   "description": "Media assets registry for instagram",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "./scripts/deploy.sh"
+    "deploy": "./scripts/deploy.sh",
+    "lint": "prettier --write \"src/**/*.js\""
   },
   "author": "sergey@orbs.com",
   "license": "MIT",
@@ -19,6 +20,11 @@
     "querystring": "^0.2.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.1"
+    "eslint": "^6.2.1",
+    "nodemon": "^1.19.1",
+    "prettier": "^1.18.2"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }
