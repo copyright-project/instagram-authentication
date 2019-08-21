@@ -4,13 +4,19 @@ const cors = require('cors');
 const axios = require('axios');
 const express = require('express');
 const querystring = require('querystring');
+const Sentry = require('@sentry/node');
 
 const PORT = process.env.PORT || 4567;
 const CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 const CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
 
+Sentry.init({
+  dsn: 'https://08fcc7335f9346f191c1f17b744b67dc@sentry.io/1537378'
+});
+
 const app = express();
 
+app.use(Sentry.Handlers.requestHandler());
 app.use(cors());
 
 const LP_THANK_YOU_PAGE_URL = 'https://www.copyrightproject.org/thanks';
@@ -71,6 +77,8 @@ app.get('/ping', (req, res) => {
   res.send('pong');
   res.end();
 });
+
+app.use(Sentry.Handlers.errorHandler());
 
 app.listen(PORT, () => {
   console.log(`Yayyyy! We are running at ${PORT}`);

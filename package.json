@@ -13,6 +13,7 @@
   "author": "sergey@orbs.com",
   "license": "MIT",
   "dependencies": {
+    "@sentry/node": "^5.6.2",
     "axios": "^0.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
