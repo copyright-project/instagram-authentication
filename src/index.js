@@ -101,6 +101,8 @@ app.post('/copyright', async (req, res) => {
   const { attribution, id } = req.body;
   if (!attribution || !id) {
     res.sendStatus(422);
+
+    return;
   }
   const userId = AES.decrypt(id, CRYPTO_SECRET).toString(enc.Utf8);
   await axios.patch(
