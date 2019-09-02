@@ -58,8 +58,7 @@ app.get('/auth', async (req, res) => {
     await axios.patch(
       `https://instagram-media-rights.firebaseio.com/users/${data.user.id}.json`,
       {
-        accessToken: data.access_token,
-        username: data.user.username
+        accessToken: data.access_token
       }
     );
     if (isLocalhost(req)) {
