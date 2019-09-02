@@ -3,12 +3,27 @@ require('dotenv').config();
 const cors = require('cors');
 const axios = require('axios');
 const express = require('express');
-const querystring = require('querystring');
+const { auth } = require('./auth');
 const Sentry = require('@sentry/node');
+const { google } = require('googleapis');
+const querystring = require('querystring');
 
 const PORT = process.env.PORT || 4567;
 const CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 const CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
+const serviceAccount = require('../DO_NOT_COMMIT_IT_OR_BE_FIRED.json');
+
+const scopes = [
+  'https://www.googleapis.com/auth/userinfo.email',
+  'https://www.googleapis.com/auth/firebase.database'
+];
+
+const jwtClient = new google.auth.JWT(
+  serviceAccount.client_email,
+  null,
+  serviceAccount.private_key,
+  scopes
+);
 
 Sentry.init({
   dsn: 'https://08fcc7335f9346f191c1f17b744b67dc@sentry.io/1537378'
@@ -17,6 +32,7 @@ Sentry.init({
 const app = express();
 
 app.use(Sentry.Handlers.requestHandler());
+app.use(auth(jwtClient));
 app.use(cors());
 
 const LP_THANK_YOU_PAGE_URL = 'https://www.copyrightproject.org/thanks';
@@ -56,7 +72,7 @@ app.get('/auth', async (req, res) => {
       querystring.stringify(params)
     );
     await axios.patch(
-      `https://instagram-media-rights.firebaseio.com/users/${data.user.id}.json`,
+      `https://instagram-media-rights.firebaseio.com/users/${data.user.id}.json?access_token=${req.firebaseAccessToken}`,
       {
         accessToken: data.access_token
       }
