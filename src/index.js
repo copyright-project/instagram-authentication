@@ -6,9 +6,12 @@ const express = require('express');
 const { auth } = require('./auth');
 const Sentry = require('@sentry/node');
 const { google } = require('googleapis');
+const { AES, enc } = require('crypto-js');
+const bodyParser = require('body-parser');
 const querystring = require('querystring');
 
 const PORT = process.env.PORT || 4567;
+const CRYPTO_SECRET = process.env.CRYPTO_SECRET;
 const CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 const CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
 const serviceAccount = require('../DO_NOT_COMMIT_IT_OR_BE_FIRED.json');
@@ -32,10 +35,9 @@ Sentry.init({
 const app = express();
 
 app.use(Sentry.Handlers.requestHandler());
+app.use(bodyParser.json());
 app.use(auth(jwtClient));
 app.use(cors());
-
-const LP_THANK_YOU_PAGE_URL = 'https://www.copyrightproject.org/thanks';
 
 const isLocalhost = req => req.hostname.indexOf('localhost') > -1;
 
@@ -45,6 +47,12 @@ const buildServiceRedirectUrl = req => {
   } else {
     return `https://${req.hostname}/auth`;
   }
+};
+
+const buildThankYouPageUrl = userId => {
+  const hash = AES.encrypt(userId, CRYPTO_SECRET).toString();
+
+  return `https://www.copyrightproject.org/thanks?id=${hash}`;
 };
 
 app.get('/start', (req, res) => {
@@ -74,13 +82,14 @@ app.get('/auth', async (req, res) => {
     await axios.patch(
       `https://instagram-media-rights.firebaseio.com/users/${data.user.id}.json?access_token=${req.firebaseAccessToken}`,
       {
-        accessToken: data.access_token
+        accessToken: data.access_token,
+        copyrightAttribution: data.user.full_name
       }
     );
     if (isLocalhost(req)) {
       res.send(data);
     } else {
-      res.redirect(LP_THANK_YOU_PAGE_URL);
+      res.redirect(buildThankYouPageUrl(data.user.id));
     }
   } catch (error) {
     console.error(error);
@@ -88,9 +97,23 @@ app.get('/auth', async (req, res) => {
   }
 });
 
+app.post('/copyright', async (req, res) => {
+  const { attribution, id } = req.body;
+  if (!attribution || !id) {
+    res.sendStatus(422);
+  }
+  const userId = AES.decrypt(id, CRYPTO_SECRET).toString(enc.Utf8);
+  await axios.patch(
+    `https://instagram-media-rights.firebaseio.com/users/${userId}.json?access_token=${req.firebaseAccessToken}`,
+    {
+      copyrightAttribution: attribution
+    }
+  );
+  res.sendStatus(200);
+});
+
 app.get('/ping', (req, res) => {
   res.send('pong');
-  res.end();
 });
 
 app.use(Sentry.Handlers.errorHandler());
