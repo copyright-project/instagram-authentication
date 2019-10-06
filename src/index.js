@@ -52,7 +52,7 @@ const buildServiceRedirectUrl = req => {
 const buildThankYouPageUrl = userId => {
   const hash = AES.encrypt(userId, CRYPTO_SECRET).toString();
 
-  return `https://www.copyrightproject.org/thanks?id=${hash}`;
+  return `https://www.open-rights.org/thanks?id=${hash}`;
 };
 
 app.get('/start', (req, res) => {
