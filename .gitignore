@@ -61,5 +61,6 @@ typings/
 .next
 
 DO_NOT_COMMIT_IT_OR_BE_FIRED.json
+open-rights-*.json
 
 .DS_Store

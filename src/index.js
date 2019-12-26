@@ -14,12 +14,14 @@ const PORT = process.env.PORT || 4567;
 const CRYPTO_SECRET = process.env.CRYPTO_SECRET;
 const CLIENT_ID = process.env.INSTAGRAM_CLIENT_ID;
 const CLIENT_SECRET = process.env.INSTAGRAM_CLIENT_SECRET;
-const serviceAccount = require('../DO_NOT_COMMIT_IT_OR_BE_FIRED.json');
+const serviceAccount = require('../open-rights-firebase-adminsdk.json');
 
 const scopes = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/firebase.database'
 ];
+
+const DB_BASE_URL = 'https://open-rights.firebaseio.com/users';
 
 const jwtClient = new google.auth.JWT(
   serviceAccount.client_email,
@@ -80,7 +82,7 @@ app.get('/auth', async (req, res) => {
       querystring.stringify(params)
     );
     await axios.patch(
-      `https://instagram-media-rights.firebaseio.com/users/${data.user.id}.json?access_token=${req.firebaseAccessToken}`,
+      `${DB_BASE_URL}/${data.user.id}.json?access_token=${req.firebaseAccessToken}`,
       {
         accessToken: data.access_token,
         copyrightAttribution: data.user.full_name
@@ -106,7 +108,7 @@ app.post('/copyright', async (req, res) => {
   }
   const userId = AES.decrypt(id, CRYPTO_SECRET).toString(enc.Utf8);
   await axios.patch(
-    `https://instagram-media-rights.firebaseio.com/users/${userId}.json?access_token=${req.firebaseAccessToken}`,
+    `${DB_BASE_URL}/${userId}.json?access_token=${req.firebaseAccessToken}`,
     {
       copyrightAttribution: attribution
     }
