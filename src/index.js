@@ -21,7 +21,7 @@ const scopes = [
   'https://www.googleapis.com/auth/firebase.database'
 ];
 
-const DB_BASE_URL = 'https://open-rights.firebaseio.com/users';
+const DB_BASE_URL = 'https://open-rights.firebaseio.com/new';
 
 const jwtClient = new google.auth.JWT(
   serviceAccount.client_email,
